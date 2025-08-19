@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         // Set JAVA and MAVEN manually (Windows paths, adjust to your system)
-        JAVA_HOME = "C:\\Program Files\\Java\\jdk-11"
-        MAVEN_HOME = "C:\\apache-maven-3.9.9"
+        JAVA_HOME = "C:\\Program Files\\Java\\jdk-21"
+        MAVEN_HOME = "C:\\SR\\SR12\\apache-maven-3.9.9"
         PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
     }
 
