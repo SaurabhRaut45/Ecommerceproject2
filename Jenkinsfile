@@ -1,66 +1,49 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'   // Configure Maven in Jenkins Global Tools
-        jdk 'JDK11'     // Configure JDK in Jenkins Global Tools
+    environment {
+        // Set JAVA and MAVEN manually (Windows paths, adjust to your system)
+        JAVA_HOME = "C:\\Program Files\\Java\\jdk-11"
+        MAVEN_HOME = "C:\\apache-maven-3.9.9"
+        PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                // Pull code from GitHub (already handled by Jenkins SCM usually)
+                git branch: 'main', url: 'https://github.com/SaurabhRaut45/Ecommerceproject2.git'
             }
         }
 
         stage('Build') {
             steps {
-                echo "Running Maven Build..."
-                sh 'mvn clean install -DskipTests'
+                echo "Building with Maven..."
+                bat "mvn clean install -DskipTests"
             }
         }
 
-        stage('Run Tests') {
+        stage('Test') {
             steps {
-                echo "Executing Selenium + TestNG Tests..."
-                sh 'mvn test -Dsurefire.suiteXmlFiles=testng.xml'
+                echo "Running tests..."
+                bat "mvn test"
             }
         }
 
-        stage('Publish Reports') {
+        stage('Package') {
             steps {
-                script {
-                    // ✅ Archive TestNG reports (HTML)
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'test-output',
-                        reportFiles: 'index.html',
-                        reportName: 'TestNG Report'
-                    ])
-
-                    // ✅ Archive ExtentReports (if stored in "reports/extent-report.html")
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'reports',
-                        reportFiles: 'extent-report.html',
-                        reportName: 'Extent Report'
-                    ])
-                }
+                echo "Packaging application..."
+                bat "mvn package"
             }
         }
     }
 
     post {
-        always {
-            // Archive surefire test results
-            junit 'target/surefire-reports/*.xml'
-
-            // Save reports as build artifacts (downloadable)
-            archiveArtifacts artifacts: 'test-output/**, reports/**', fingerprint: true
+        success {
+            echo "✅ Build Successful!"
+        }
+        failure {
+            echo "❌ Build Failed!"
         }
     }
 }
